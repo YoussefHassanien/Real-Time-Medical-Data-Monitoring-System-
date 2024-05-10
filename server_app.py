@@ -1,3 +1,28 @@
+# aho ya yousseff
+# import redis
+
+# # Redis connection details
+# redis_host = 'localhost'
+# redis_port = 6379
+# redis_password = None
+
+# # Connect to Redis
+# r = redis.Redis(host=redis_host, port=redis_port, password=redis_password)
+
+# # Example usage
+# try:
+#     # Set a key-value pair
+#     r.set('mykey', 'Hello Redis!')
+
+#     # Get the value of a key
+#     value = r.get('mykey')
+#     print(value.decode('utf-8'))  # Decode bytes to string
+
+# except redis.RedisError as e:
+#     print(f"Error: {e}")
+
+
+
 import socket 
 import threading
 
