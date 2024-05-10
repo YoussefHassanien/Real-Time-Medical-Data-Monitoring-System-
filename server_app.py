@@ -1,67 +1,56 @@
-# aho ya yousseff
-# import redis
-
-# # Redis connection details
-# redis_host = 'localhost'
-# redis_port = 6379
-# redis_password = None
-
-# # Connect to Redis
-# r = redis.Redis(host=redis_host, port=redis_port, password=redis_password)
-
-# # Example usage
-# try:
-#     # Set a key-value pair
-#     r.set('mykey', 'Hello Redis!')
-
-#     # Get the value of a key
-#     value = r.get('mykey')
-#     print(value.decode('utf-8'))  # Decode bytes to string
-
-# except redis.RedisError as e:
-#     print(f"Error: {e}")
-
-
-
-import socket 
+import socket
 import threading
+import redis
 
 HEADER = 64
-SERVER_IP = "10.0.2.15"
+SERVER_IP = "192.168.56.1"
 PORT = 12345
 ADDRESS = (SERVER_IP, PORT)
 FORMAT = "utf-8"
 DISCONNECT_MESSAGE = "DISCONNECT!"
-
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind(ADDRESS)
+Database = redis.Redis(host="localhost", port=6379, password=None)
+patients = False
 
-def handle_clients(conn, addr):
-	print("[NEW CONNECTION]", addr, "connected.")
+
+def create_database_patients(patient):
+	name, patient_id, temperature, date, time = patient.split(',')
+	Database.lpush(f"{name}_{patient_id}", f"{temperature},{date},{time}")
+
+def update_patients_data(data):
+	patient_id, temperature, date, time = data.split(',')
+	keys = Database.keys(f"*{patient_id}")
+	Database.lpush(keys[0], f"{temperature},{date},{time}")
+
+
+def handle_client_message(conn, addr):
+	global patients
+	counter = 0
 	connected = True
 	while connected:
 		msg_length = conn.recv(HEADER).decode(FORMAT)
 		if msg_length:
 			msg_length = int(msg_length)
 			msg = conn.recv(msg_length).decode(FORMAT)
-			if msg == DISCONNECT_MESSAGE:
-				connected = False 		
-			print("Client of address [", addr[1], "] sent the following message:", msg)
-			message = input("Reply to the client: ")
-			conn.send(message.encode(FORMAT))
-			
+			if not patients:
+				create_database_patients(msg)
+				counter += 1
+				if counter >= 3:
+					patients = True
+			else:
+				update_patients_data(msg)
+
 	conn.close()
+
+
 
 def start_server():
 	server.listen()
-	print("[LISTENING] Server is listening on", SERVER_IP)
 	while True:
 		conn, addr = server.accept()
-		thread = threading.Thread(target=handle_clients, args=(conn,addr))
+		thread = threading.Thread(target=handle_client_message, args=(conn, addr))
 		thread.start()
-		print("[ACTIVE CONNECTIONS]", threading.active_count() - 1)
-	
-	
-print("[STARTING] server is starting")
-start_server()	
 
+
+start_server()
