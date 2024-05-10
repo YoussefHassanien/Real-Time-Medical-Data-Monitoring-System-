@@ -1,0 +1,405 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Form</class>
+ <widget class="QWidget" name="Form">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1138</width>
+    <height>455</height>
+   </rect>
+  </property>
+  <property name="font">
+   <font>
+    <weight>75</weight>
+    <bold>true</bold>
+   </font>
+  </property>
+  <property name="windowTitle">
+   <string>Data_Monitor</string>
+  </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>Assets/donut-chart.png</normaloff>Assets/donut-chart.png</iconset>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="0" column="0">
+    <layout class="QVBoxLayout" name="verticalLayout_4">
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <item>
+        <widget class="QTextEdit" name="Search_Text_Edit">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>700</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>60</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="Search_Button">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>100</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>40</height>
+          </size>
+         </property>
+         <property name="font">
+          <font>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Search</string>
+         </property>
+         <property name="icon">
+          <iconset>
+           <normaloff>Assets/search.png</normaloff>Assets/search.png</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>20</width>
+           <height>20</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_5">
+       <item>
+        <layout class="QVBoxLayout" name="verticalLayout">
+         <item>
+          <widget class="QLabel" name="Data_Table_Label">
+           <property name="font">
+            <font>
+             <pointsize>10</pointsize>
+             <weight>75</weight>
+             <bold>true</bold>
+            </font>
+           </property>
+           <property name="text">
+            <string>Data Table</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QTableWidget" name="Data_Table">
+           <property name="minimumSize">
+            <size>
+             <width>510</width>
+             <height>270</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>650</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="font">
+            <font>
+             <pointsize>10</pointsize>
+             <weight>75</weight>
+             <bold>true</bold>
+            </font>
+           </property>
+           <property name="editTriggers">
+            <set>QAbstractItemView::NoEditTriggers</set>
+           </property>
+           <property name="dragDropOverwriteMode">
+            <bool>false</bool>
+           </property>
+           <column>
+            <property name="text">
+             <string>ID</string>
+            </property>
+            <property name="icon">
+             <iconset>
+              <normaloff>Assets/list.png</normaloff>Assets/list.png</iconset>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>Name</string>
+            </property>
+            <property name="icon">
+             <iconset>
+              <normaloff>Assets/id-card.png</normaloff>Assets/id-card.png</iconset>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>Temperature</string>
+            </property>
+            <property name="icon">
+             <iconset>
+              <normaloff>Assets/thermometer.png</normaloff>Assets/thermometer.png</iconset>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>Date</string>
+            </property>
+            <property name="icon">
+             <iconset>
+              <normaloff>Assets/calendar.png</normaloff>Assets/calendar.png</iconset>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>Time</string>
+            </property>
+            <property name="icon">
+             <iconset>
+              <normaloff>Assets/hourglass.png</normaloff>Assets/hourglass.png</iconset>
+            </property>
+           </column>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QVBoxLayout" name="verticalLayout_5">
+         <item>
+          <widget class="QLabel" name="Patients_Temperature_Label">
+           <property name="font">
+            <font>
+             <pointsize>10</pointsize>
+             <weight>75</weight>
+             <bold>true</bold>
+            </font>
+           </property>
+           <property name="text">
+            <string>Patients Temperature Graph</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="PlotWidget" name="Patients_Temperature_Graph">
+           <property name="minimumSize">
+            <size>
+             <width>580</width>
+             <height>0</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_4">
+       <item>
+        <layout class="QVBoxLayout" name="verticalLayout_3">
+         <item>
+          <widget class="QLabel" name="Table_Sorting_Label">
+           <property name="font">
+            <font>
+             <pointsize>10</pointsize>
+             <weight>75</weight>
+             <bold>true</bold>
+            </font>
+           </property>
+           <property name="text">
+            <string>Table Sorting</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_2">
+           <item>
+            <widget class="QRadioButton" name="Ascending_Radio_Button">
+             <property name="font">
+              <font>
+               <weight>75</weight>
+               <bold>true</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string>Ascending</string>
+             </property>
+             <property name="icon">
+              <iconset>
+               <normaloff>Assets/list (1).png</normaloff>Assets/list (1).png</iconset>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>20</width>
+               <height>20</height>
+              </size>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QRadioButton" name="Descending_Radio_Button">
+             <property name="font">
+              <font>
+               <weight>75</weight>
+               <bold>true</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string>Descending</string>
+             </property>
+             <property name="icon">
+              <iconset>
+               <normaloff>Assets/list (2).png</normaloff>Assets/list (2).png</iconset>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>20</width>
+               <height>20</height>
+              </size>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QComboBox" name="Sorting_Combo_Box">
+             <property name="font">
+              <font>
+               <weight>75</weight>
+               <bold>true</bold>
+              </font>
+             </property>
+             <item>
+              <property name="text">
+               <string>ID</string>
+              </property>
+              <property name="icon">
+               <iconset>
+                <normaloff>Assets/list.png</normaloff>Assets/list.png</iconset>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Name</string>
+              </property>
+              <property name="icon">
+               <iconset>
+                <normaloff>Assets/id-card.png</normaloff>Assets/id-card.png</iconset>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Temperature</string>
+              </property>
+              <property name="icon">
+               <iconset>
+                <normaloff>Assets/thermometer.png</normaloff>Assets/thermometer.png</iconset>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Date</string>
+              </property>
+              <property name="icon">
+               <iconset>
+                <normaloff>Assets/calendar.png</normaloff>Assets/calendar.png</iconset>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Time</string>
+              </property>
+              <property name="icon">
+               <iconset>
+                <normaloff>Assets/hourglass.png</normaloff>Assets/hourglass.png</iconset>
+              </property>
+             </item>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QVBoxLayout" name="verticalLayout_2">
+         <item>
+          <widget class="QLabel" name="Table_Controls_Label">
+           <property name="font">
+            <font>
+             <pointsize>10</pointsize>
+             <weight>75</weight>
+             <bold>true</bold>
+            </font>
+           </property>
+           <property name="text">
+            <string>Table Controls</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_3">
+           <item>
+            <widget class="QPushButton" name="Reset_Table_Button">
+             <property name="font">
+              <font>
+               <weight>75</weight>
+               <bold>true</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string>Reset Table</string>
+             </property>
+             <property name="icon">
+              <iconset>
+               <normaloff>Assets/refresh-arrow.png</normaloff>Assets/refresh-arrow.png</iconset>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>16</width>
+               <height>16</height>
+              </size>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>PlotWidget</class>
+   <extends>QGraphicsView</extends>
+   <header location="global">pyqtgraph</header>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>
