@@ -17,7 +17,7 @@ class Ui_Form(object):
         self.temperature_values = []
         self.timer = QtCore.QTimer()  
         self.current_index = 0
-        self.sort_ascending = True
+        self.sort_descending = False
         
     def reset_table_clicked(self):
         # Clear previous data and initialize for new data
@@ -26,7 +26,7 @@ class Ui_Form(object):
         self.current_index = 0
         # Retrieve all data from the database
         self.receive_data()
-        if self.sort_ascending:
+        if self.sort_descending:
             self.sort_table_ascending()
         else:
             self.sort_table_descending()
@@ -161,29 +161,76 @@ class Ui_Form(object):
     def update_table(self):
         self.Data_Table.clearContents()
 
-        # Sort the received_data based on patient ID (item[0])
-        sorted_data = sorted(self.received_data, key=lambda item: item[0], reverse=not self.sort_ascending)
+        # Determine the sorting key based on the selected combo box item
+        sorting_key = self.Sorting_Combo_Box.currentText()
 
-        # Set the number of rows based on sorted data
-        self.Data_Table.setRowCount(len(sorted_data))
+        # Map the sorting key to corresponding column index in the table
+        column_mapping = {
+            "ID": 0,
+            "Name": 1
+        }
 
-        for row_index, (key_str, values_str) in enumerate(sorted_data):
-            patient_name, patient_id = key_str.split('_')
-            temperature, date, time = values_str.split(',')
+        # Get the corresponding column index from the mapping
+        sort_column = column_mapping.get(sorting_key, None)
 
-            # Populate table with extracted data
-            self.Data_Table.setItem(row_index, 0, QtWidgets.QTableWidgetItem(patient_id))
-            self.Data_Table.setItem(row_index, 1, QtWidgets.QTableWidgetItem(patient_name))
-            self.Data_Table.setItem(row_index, 2, QtWidgets.QTableWidgetItem(temperature))
-            self.Data_Table.setItem(row_index, 3, QtWidgets.QTableWidgetItem(date))
-            self.Data_Table.setItem(row_index, 4, QtWidgets.QTableWidgetItem(time))
+        if sort_column is not None:
+            try:
+                # Sort the received_data based on the selected column using get_sort_value function
+                sorted_data = sorted(self.received_data, key=lambda item: self.get_sort_value(item[0], sort_column), reverse=self.sort_descending)
+
+                # Set the number of rows based on sorted data
+                self.Data_Table.setRowCount(len(sorted_data))
+
+                for row_index, (key_str, values_str) in enumerate(sorted_data):
+                    # Extract components from the key_str and values_str
+                    parts = key_str.split('_')
+                    patient_id = parts[-1]
+                    patient_name = parts[0]
+                    temperature, _, _ = values_str.split(',')  
+                    _, date, _ = values_str.split(',')
+                    _, _, time = values_str.split(',')
+
+                    # Populate table with extracted data
+                    self.Data_Table.setItem(row_index, 0, QtWidgets.QTableWidgetItem(patient_id))
+                    self.Data_Table.setItem(row_index, 1, QtWidgets.QTableWidgetItem(patient_name))
+                    self.Data_Table.setItem(row_index, 2, QtWidgets.QTableWidgetItem(temperature))
+                    self.Data_Table.setItem(row_index, 3, QtWidgets.QTableWidgetItem(date))
+                    self.Data_Table.setItem(row_index, 4, QtWidgets.QTableWidgetItem(time))
+
+            except Exception as e:
+                print(f"Error updating table: {e}")
+        else:
+            print("Invalid sorting column selected.")
+
+        self.Data_Table.update()
+
+    def get_sort_value(self, key_str, sort_column):
+        parts = key_str.split('_')
+
+        if sort_column == 0:
+            # Sorting by ID (extract and convert the numeric ID part)
+            if len(parts) > 1:
+                try:
+                    return int(parts[-1])  # Convert the last part to an integer (assuming it's the ID)
+                except ValueError:
+                    return 0  # Return 0 if conversion fails or no valid ID found
+            else:
+                return 0  # Return 0 if no valid ID found
+        elif sort_column == 1:
+            # Sorting by Name (extract the name part)
+            if len(parts) > 0:
+                return parts[0]  # First part is the name
+            else:
+                return ""  # Return empty string if no valid name found
+        else:
+            return None  
 
     def sort_table_ascending(self):
-        self.sort_ascending = True
+        self.sort_descending = False
         self.update_table()
 
     def sort_table_descending(self):
-        self.sort_ascending = False
+        self.sort_descending = True
         self.update_table()
 
     def setupUi(self, Form):
@@ -357,9 +404,6 @@ class Ui_Form(object):
         self.Sorting_Combo_Box.setObjectName("Sorting_Combo_Box")
         self.Sorting_Combo_Box.addItem(icon2, "")
         self.Sorting_Combo_Box.addItem(icon3, "")
-        self.Sorting_Combo_Box.addItem(icon4, "")
-        self.Sorting_Combo_Box.addItem(icon5, "")
-        self.Sorting_Combo_Box.addItem(icon6, "")
         self.horizontalLayout_2.addWidget(self.Sorting_Combo_Box)
         self.verticalLayout_3.addLayout(self.horizontalLayout_2)
         self.horizontalLayout_4.addLayout(self.verticalLayout_3)
@@ -399,6 +443,8 @@ class Ui_Form(object):
         self.Ascending_Radio_Button.clicked.connect(self.sort_table_ascending)
         self.Descending_Radio_Button.clicked.connect(self.sort_table_descending)
         self.Reset_Table_Button.clicked.connect(self.reset_table_clicked)
+        self.Sorting_Combo_Box.currentIndexChanged.connect(self.update_table)
+
 
 
 
@@ -409,7 +455,6 @@ class Ui_Form(object):
 
         self.timer.timeout.connect(self.update_plot_dynamically)
         self.timer.setInterval(1000)  
-
 
     def retranslateUi(self, Form):
         _translate = QtCore.QCoreApplication.translate
