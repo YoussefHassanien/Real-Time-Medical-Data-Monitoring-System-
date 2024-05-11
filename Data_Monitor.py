@@ -2,7 +2,6 @@ import sys
 import redis
 from PyQt5 import QtCore, QtGui, QtWidgets
 from pyqtgraph import PlotWidget
-from datetime import datetime
 
 
 
