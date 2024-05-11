@@ -17,6 +17,7 @@ class Ui_Form(object):
         self.temperature_values = []
         self.timer = QtCore.QTimer()  
         self.current_index = 0
+        self.sort_ascending = True
         
        
 
@@ -152,10 +153,13 @@ class Ui_Form(object):
     def update_table(self):
         self.Data_Table.clearContents()
 
-        # Set the number of rows based on received data
-        self.Data_Table.setRowCount(len(self.received_data))
+        # Sort the received_data based on patient ID (item[0])
+        sorted_data = sorted(self.received_data, key=lambda item: item[0], reverse=not self.sort_ascending)
 
-        for row_index, (key_str, values_str) in enumerate(self.received_data):
+        # Set the number of rows based on sorted data
+        self.Data_Table.setRowCount(len(sorted_data))
+
+        for row_index, (key_str, values_str) in enumerate(sorted_data):
             patient_name, patient_id = key_str.split('_')
             temperature, date, time = values_str.split(',')
 
@@ -165,6 +169,14 @@ class Ui_Form(object):
             self.Data_Table.setItem(row_index, 2, QtWidgets.QTableWidgetItem(temperature))
             self.Data_Table.setItem(row_index, 3, QtWidgets.QTableWidgetItem(date))
             self.Data_Table.setItem(row_index, 4, QtWidgets.QTableWidgetItem(time))
+
+    def sort_table_ascending(self):
+        self.sort_ascending = True
+        self.update_table()
+
+    def sort_table_descending(self):
+        self.sort_ascending = False
+        self.update_table()
 
     def setupUi(self, Form):
         Form.setObjectName("Form")
@@ -376,12 +388,18 @@ class Ui_Form(object):
 
         self.Search_Button.clicked.connect(self.search_patient)
         self.Data_Table.itemClicked.connect(self.on_table_item_clicked)
+        self.Ascending_Radio_Button.clicked.connect(self.sort_table_ascending)
+        self.Descending_Radio_Button.clicked.connect(self.sort_table_descending)
+
 
         # Update table initially to show all patients
         self.receive_data()
+        self.sort_table_ascending() 
+        self.Ascending_Radio_Button.setChecked(True)
 
         self.timer.timeout.connect(self.update_plot_dynamically)
         self.timer.setInterval(1000)  
+
 
     def retranslateUi(self, Form):
         _translate = QtCore.QCoreApplication.translate
