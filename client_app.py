@@ -23,11 +23,8 @@ def generate_random_patient():
 	if patient_name is None and patient_id is None:
 		patient_name = f"{random.choice(first_names)} {random.choice(last_names)}"
 		patient_id = round(random.uniform(1, 100))
-		temperature = round(random.uniform(36.1, 37.3), 1)
-		date_and_time = datetime.datetime.now().strftime("%Y-%m-%d,%H:%M:%S")
-	else:
-		temperature = round(random.uniform(36.1, 37.3), 1)
-		date_and_time = datetime.datetime.now().strftime("%Y-%m-%d,%H:%M:%S")
+	temperature = round(random.uniform(36.1, 37.3), 1)
+	date_and_time = datetime.datetime.now().strftime("%Y-%m-%d,%H:%M:%S")
 	return f"{patient_name},{patient_id},{temperature},{date_and_time}"
 
 
