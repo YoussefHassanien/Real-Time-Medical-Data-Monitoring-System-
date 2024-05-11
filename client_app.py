@@ -1,13 +1,13 @@
 import socket
 import random
 import datetime
+import time
 
 
 HEADER = 64
 SERVER_IP = "192.168.56.1"
 PORT = 12345
 FORMAT = "utf-8"
-DISCONNECT_MESSAGE = "DISCONNECT!"
 ADDRESS = (SERVER_IP, PORT)
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client.connect(ADDRESS)
@@ -40,3 +40,5 @@ def send_data(msg):
 while True:
 	message = generate_random_patient()
 	send_data(message)
+	time.sleep(0.1)
+

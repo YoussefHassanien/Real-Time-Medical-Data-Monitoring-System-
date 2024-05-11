@@ -7,7 +7,6 @@ SERVER_IP = "192.168.56.1"
 PORT = 12345
 ADDRESS = (SERVER_IP, PORT)
 FORMAT = "utf-8"
-DISCONNECT_MESSAGE = "DISCONNECT!"
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind(ADDRESS)
 Database = redis.Redis(host="localhost", port=6379, password=None)
@@ -21,7 +20,6 @@ def create_database_patient(patient):
 	else:
 		Database.lpush(f"{name}_{patient_id}", f"{temperature},{date},{time}")
 
-
 def handle_client_message(conn, addr):
 	connected = True
 	while connected:
@@ -30,8 +28,6 @@ def handle_client_message(conn, addr):
 			msg_length = int(msg_length)
 			msg = conn.recv(msg_length).decode(FORMAT)
 			create_database_patient(msg)
-
-	conn.close()
 
 
 def start_server():

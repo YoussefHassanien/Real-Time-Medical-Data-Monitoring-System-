@@ -1,9 +1,47 @@
 import sys
+import redis
 from PyQt5 import QtCore, QtGui, QtWidgets
 from pyqtgraph import PlotWidget
 
 
 class Ui_Form(object):
+    def __init__(self):
+        self.patient_name = ""
+        self.patient_id = ""
+        self.format = "utf-8"
+        self.database = redis.Redis(host="localhost", port=6379, password=None)
+        self.received_data = []
+
+    def receive_data(self):
+        self.keys = self.database.keys('*')
+        self.Data_Table.setRowCount(len(self.keys))
+
+    def update_table(self):
+        keys = self.database.keys('*')
+        self.Data_Table.setRowCount(len(keys))
+        for row_index, key in enumerate(keys):
+            key_str = key.decode(self.format)
+            values = self.database.lindex(key_str, 0)
+            values_str = values.decode(self.format)
+            patient_name, patient_id = key_str.split('_')
+            temperature, date, time = values_str.split(',')
+            item0 = QtWidgets.QTableWidgetItem()
+            item0.setText(patient_id)
+            self.Data_Table.setItem(row_index, 0, item0)
+            item1 = QtWidgets.QTableWidgetItem()
+            item1.setText(patient_name)
+            self.Data_Table.setItem(row_index,1, item1)
+            item2 = QtWidgets.QTableWidgetItem()
+            item2.setText(temperature)
+            self.Data_Table.setItem(row_index,2, item2)
+            item3 = QtWidgets.QTableWidgetItem()
+            item3.setText(date)
+            self.Data_Table.setItem(row_index,3, item3)
+            item4 = QtWidgets.QTableWidgetItem()
+            item4.setText(time)
+            self.Data_Table.setItem(row_index,4, item4)
+
+
     def setupUi(self, Form):
         Form.setObjectName("Form")
         Form.resize(1138, 455)
@@ -73,7 +111,11 @@ class Ui_Form(object):
         self.Data_Table.setDragDropOverwriteMode(False)
         self.Data_Table.setObjectName("Data_Table")
         self.Data_Table.setColumnCount(5)
-        self.Data_Table.setRowCount(0)
+        self.Data_Table.setRowCount(2)
+        item = QtWidgets.QTableWidgetItem()
+        self.Data_Table.setVerticalHeaderItem(0, item)
+        item = QtWidgets.QTableWidgetItem()
+        self.Data_Table.setVerticalHeaderItem(1, item)
         item = QtWidgets.QTableWidgetItem()
         icon2 = QtGui.QIcon()
         icon2.addPixmap(QtGui.QPixmap("Assets/list.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
@@ -99,6 +141,16 @@ class Ui_Form(object):
         icon6.addPixmap(QtGui.QPixmap("Assets/hourglass.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         item.setIcon(icon6)
         self.Data_Table.setHorizontalHeaderItem(4, item)
+        item = QtWidgets.QTableWidgetItem()
+        self.Data_Table.setItem(0, 0, item)
+        item = QtWidgets.QTableWidgetItem()
+        self.Data_Table.setItem(0, 1, item)
+        item = QtWidgets.QTableWidgetItem()
+        self.Data_Table.setItem(0, 2, item)
+        item = QtWidgets.QTableWidgetItem()
+        self.Data_Table.setItem(0, 3, item)
+        item = QtWidgets.QTableWidgetItem()
+        self.Data_Table.setItem(0, 4, item)
         self.verticalLayout.addWidget(self.Data_Table)
         self.horizontalLayout_5.addLayout(self.verticalLayout)
         self.verticalLayout_5 = QtWidgets.QVBoxLayout()
@@ -203,6 +255,10 @@ class Ui_Form(object):
         Form.setWindowTitle(_translate("Form", "Data_Monitor"))
         self.Search_Button.setText(_translate("Form", "Search"))
         self.Data_Table_Label.setText(_translate("Form", "Data Table"))
+        item = self.Data_Table.verticalHeaderItem(0)
+        # item.setText(_translate("Form", "Patient"))
+        item = self.Data_Table.verticalHeaderItem(1)
+        # item.setText(_translate("Form", "Patient"))
         item = self.Data_Table.horizontalHeaderItem(0)
         item.setText(_translate("Form", "ID"))
         item = self.Data_Table.horizontalHeaderItem(1)
@@ -231,5 +287,6 @@ if __name__ == "__main__":
     Form = QtWidgets.QWidget()
     ui = Ui_Form()
     ui.setupUi(Form)
+    ui.update_table()
     Form.show()
     sys.exit(app.exec_())
