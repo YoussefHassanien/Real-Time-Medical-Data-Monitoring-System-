@@ -2,6 +2,9 @@ import sys
 import redis
 from PyQt5 import QtCore, QtGui, QtWidgets
 from pyqtgraph import PlotWidget
+from datetime import datetime
+
+
 
 
 class Ui_Form(object):
@@ -11,6 +14,76 @@ class Ui_Form(object):
         self.format = "utf-8"
         self.database = redis.Redis(host="localhost", port=6379, password=None)
         self.received_data = []
+        self.temperature_values = []
+        self.timer = QtCore.QTimer()  
+        self.current_index = 0
+        
+       
+
+    def update_plot_dynamically(self):
+        if self.current_index < len(self.temperature_values):
+            next_temperature = self.temperature_values[self.current_index]
+            self.append_temperature_point(self.current_index + 1, next_temperature)
+            self.current_index += 1
+        else:
+            self.timer.stop()
+
+    def append_temperature_point(self, index, temperature):
+        if index > 1:
+            # Connect the new point to the previous point
+            last_index = index - 1
+            last_temperature = self.temperature_values[index - 2]
+            self.Patients_Temperature_Graph.plot([last_index, index], [last_temperature, temperature], pen='r', symbol='o', name='Temperature vs. Index')
+        else:
+            # Plot the first point without connecting
+            self.Patients_Temperature_Graph.plot([index], [temperature], pen='r', symbol='o', name='Temperature vs. Index')
+
+        # Update x-axis range based on number of points plotted
+        if index > 10:
+            # Shift x-axis to show the most recent points
+            self.Patients_Temperature_Graph.setXRange(index - 10, index, padding=0.05)
+
+    def on_table_item_clicked(self, item):
+    # Clear previous data and initialize for new data
+        self.Patients_Temperature_Graph.clear()
+        self.temperature_values = []
+        self.current_index = 0
+
+        # Get the selected patient ID from the clicked item
+        row = item.row()
+        patient_id_item = self.Data_Table.item(row, 0)
+        if patient_id_item:
+            patient_id = patient_id_item.text()
+
+            # Retrieve all temperature values for the selected patient ID
+            search_key = f"*_{patient_id}"
+            keys = self.database.keys(search_key)
+
+            for key in keys:
+                key_str = key.decode(self.format) if isinstance(key, bytes) else key
+                values = self.database.lrange(key_str, 0, -1)
+                for value in values:
+                    value_str = value.decode(self.format)
+                    try:
+                        # Extract temperature component from value string
+                        temperature_str = value_str.split(',')[0].strip()
+                        temperature = float(temperature_str)
+                        self.temperature_values.append(temperature)
+                    except (ValueError, IndexError):
+                        print(f"Error: Invalid temperature value in {value_str}")
+
+            # Start the QTimer to begin dynamic plotting from the beginning
+            if self.temperature_values:
+                self.timer.stop()  
+                self.timer.start()  
+
+                # Reset x-axis range to show the initial data points
+                num_points = len(self.temperature_values)
+                if num_points > 10:
+                    self.Patients_Temperature_Graph.setXRange(0, 10, padding=0.05)
+                else:
+                    self.Patients_Temperature_Graph.setXRange(0, num_points, padding=0.05)
+
 
     def receive_data(self, patient_id=None):
         if patient_id:
@@ -61,7 +134,7 @@ class Ui_Form(object):
                 self.receive_data(patient_id=patient_id)
             else:
                 print(f"Patient with ID {patient_id} not found in database.")
-                self.receive_data()  # Refresh table with all data
+                self.receive_data()  
 
 
     def get_patient_name(self, patient_id):
@@ -70,7 +143,6 @@ class Ui_Form(object):
         keys = self.database.keys(key_pattern)
 
         if keys:
-            # Assuming there's only one key matching the pattern
             key = keys[0].decode(self.format)
             patient_name, _ = key.split('_')
             return patient_name
@@ -78,7 +150,6 @@ class Ui_Form(object):
             return None
         
     def update_table(self):
-        # Clear table before populating with new data
         self.Data_Table.clearContents()
 
         # Set the number of rows based on received data
@@ -303,11 +374,14 @@ class Ui_Form(object):
         self.retranslateUi(Form)
         QtCore.QMetaObject.connectSlotsByName(Form)
 
-         # Connect Search_Button click event to search_patient method
         self.Search_Button.clicked.connect(self.search_patient)
+        self.Data_Table.itemClicked.connect(self.on_table_item_clicked)
 
         # Update table initially to show all patients
         self.receive_data()
+
+        self.timer.timeout.connect(self.update_plot_dynamically)
+        self.timer.setInterval(1000)  
 
     def retranslateUi(self, Form):
         _translate = QtCore.QCoreApplication.translate
