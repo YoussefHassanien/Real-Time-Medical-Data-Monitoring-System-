@@ -11,38 +11,27 @@ DISCONNECT_MESSAGE = "DISCONNECT!"
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind(ADDRESS)
 Database = redis.Redis(host="localhost", port=6379, password=None)
-patients = False
 
 
-def create_database_patients(patient):
+def create_database_patient(patient):
 	name, patient_id, temperature, date, time = patient.split(',')
-	Database.lpush(f"{name}_{patient_id}", f"{temperature},{date},{time}")
-
-def update_patients_data(data):
-	patient_id, temperature, date, time = data.split(',')
 	keys = Database.keys(f"*{patient_id}")
-	Database.lpush(keys[0], f"{temperature},{date},{time}")
+	if len(keys):
+		Database.lpush(keys[0], f"{temperature},{date},{time}")
+	else:
+		Database.lpush(f"{name}_{patient_id}", f"{temperature},{date},{time}")
 
 
 def handle_client_message(conn, addr):
-	global patients
-	counter = 0
 	connected = True
 	while connected:
 		msg_length = conn.recv(HEADER).decode(FORMAT)
 		if msg_length:
 			msg_length = int(msg_length)
 			msg = conn.recv(msg_length).decode(FORMAT)
-			if not patients:
-				create_database_patients(msg)
-				counter += 1
-				if counter >= 3:
-					patients = True
-			else:
-				update_patients_data(msg)
+			create_database_patient(msg)
 
 	conn.close()
-
 
 
 def start_server():
