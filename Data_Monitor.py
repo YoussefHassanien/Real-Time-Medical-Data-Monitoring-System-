@@ -19,8 +19,18 @@ class Ui_Form(object):
         self.current_index = 0
         self.sort_ascending = True
         
-       
-
+    def reset_table_clicked(self):
+        # Clear previous data and initialize for new data
+        self.Patients_Temperature_Graph.clear()
+        self.temperature_values = []
+        self.current_index = 0
+        # Retrieve all data from the database
+        self.receive_data()
+        if self.sort_ascending:
+            self.sort_table_ascending()
+        else:
+            self.sort_table_descending()
+   
     def update_plot_dynamically(self):
         if self.current_index < len(self.temperature_values):
             next_temperature = self.temperature_values[self.current_index]
@@ -85,7 +95,6 @@ class Ui_Form(object):
                 else:
                     self.Patients_Temperature_Graph.setXRange(0, num_points, padding=0.05)
 
-
     def receive_data(self, patient_id=None):
         if patient_id:
             # Fetch patient name from database using patient_id
@@ -136,7 +145,6 @@ class Ui_Form(object):
             else:
                 print(f"Patient with ID {patient_id} not found in database.")
                 self.receive_data()  
-
 
     def get_patient_name(self, patient_id):
         # Retrieve patient's name from Redis using patient_id
@@ -390,6 +398,8 @@ class Ui_Form(object):
         self.Data_Table.itemClicked.connect(self.on_table_item_clicked)
         self.Ascending_Radio_Button.clicked.connect(self.sort_table_ascending)
         self.Descending_Radio_Button.clicked.connect(self.sort_table_descending)
+        self.Reset_Table_Button.clicked.connect(self.reset_table_clicked)
+
 
 
         # Update table initially to show all patients
