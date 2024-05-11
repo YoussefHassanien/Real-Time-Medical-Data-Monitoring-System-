@@ -12,35 +12,88 @@ class Ui_Form(object):
         self.database = redis.Redis(host="localhost", port=6379, password=None)
         self.received_data = []
 
-    def receive_data(self):
-        self.keys = self.database.keys('*')
-        self.Data_Table.setRowCount(len(self.keys))
+    def receive_data(self, patient_id=None):
+        if patient_id:
+            # Fetch patient name from database using patient_id
+            patient_name = self.get_patient_name(patient_id)
 
+            # Search for a specific patient ID
+            search_key = f"*_{patient_id}"
+            keys = self.database.keys(search_key)
+            self.received_data = []
+
+            for key in keys:
+                key_str = key.decode(self.format) if isinstance(key, bytes) else key
+                values = self.database.lindex(key_str, 0)
+                if values:
+                    values_str = values.decode(self.format)
+                    self.received_data.append((key_str, values_str))
+
+            if not self.received_data:
+                print(f"No data found for patient ID: {patient_id}")
+        else:
+            # Fetch all data
+            keys = self.database.keys('*')
+            self.received_data = []
+
+            for key in keys:
+                key_str = key.decode(self.format) if isinstance(key, bytes) else key
+                values = self.database.lindex(key_str, 0)
+                if values:
+                    values_str = values.decode(self.format)
+                    self.received_data.append((key_str, values_str))
+
+        self.update_table()
+
+    def search_patient(self):
+        patient_id = self.Search_Text_Edit.toPlainText().strip()
+        print(f"Searching for patient ID: {patient_id}")
+
+        if not patient_id:
+            print("No patient ID entered. Displaying all patients.")
+            self.receive_data()  # Display all patients
+        else:
+            # Fetch patient name from database using patient_id
+            patient_name = self.get_patient_name(patient_id)
+
+            if patient_name:
+                print(f"Found patient name: {patient_name}")
+                self.receive_data(patient_id=patient_id)
+            else:
+                print(f"Patient with ID {patient_id} not found in database.")
+                self.receive_data()  # Refresh table with all data
+
+
+    def get_patient_name(self, patient_id):
+        # Retrieve patient's name from Redis using patient_id
+        key_pattern = f"*_{patient_id}"
+        keys = self.database.keys(key_pattern)
+
+        if keys:
+            # Assuming there's only one key matching the pattern
+            key = keys[0].decode(self.format)
+            patient_name, _ = key.split('_')
+            return patient_name
+        else:
+            return None
+        
     def update_table(self):
-        keys = self.database.keys('*')
-        self.Data_Table.setRowCount(len(keys))
-        for row_index, key in enumerate(keys):
-            key_str = key.decode(self.format)
-            values = self.database.lindex(key_str, 0)
-            values_str = values.decode(self.format)
+        # Clear table before populating with new data
+        self.Data_Table.clearContents()
+
+        # Set the number of rows based on received data
+        self.Data_Table.setRowCount(len(self.received_data))
+
+        for row_index, (key_str, values_str) in enumerate(self.received_data):
             patient_name, patient_id = key_str.split('_')
             temperature, date, time = values_str.split(',')
-            item0 = QtWidgets.QTableWidgetItem()
-            item0.setText(patient_id)
-            self.Data_Table.setItem(row_index, 0, item0)
-            item1 = QtWidgets.QTableWidgetItem()
-            item1.setText(patient_name)
-            self.Data_Table.setItem(row_index,1, item1)
-            item2 = QtWidgets.QTableWidgetItem()
-            item2.setText(temperature)
-            self.Data_Table.setItem(row_index,2, item2)
-            item3 = QtWidgets.QTableWidgetItem()
-            item3.setText(date)
-            self.Data_Table.setItem(row_index,3, item3)
-            item4 = QtWidgets.QTableWidgetItem()
-            item4.setText(time)
-            self.Data_Table.setItem(row_index,4, item4)
 
+            # Populate table with extracted data
+            self.Data_Table.setItem(row_index, 0, QtWidgets.QTableWidgetItem(patient_id))
+            self.Data_Table.setItem(row_index, 1, QtWidgets.QTableWidgetItem(patient_name))
+            self.Data_Table.setItem(row_index, 2, QtWidgets.QTableWidgetItem(temperature))
+            self.Data_Table.setItem(row_index, 3, QtWidgets.QTableWidgetItem(date))
+            self.Data_Table.setItem(row_index, 4, QtWidgets.QTableWidgetItem(time))
 
     def setupUi(self, Form):
         Form.setObjectName("Form")
@@ -249,6 +302,12 @@ class Ui_Form(object):
 
         self.retranslateUi(Form)
         QtCore.QMetaObject.connectSlotsByName(Form)
+
+         # Connect Search_Button click event to search_patient method
+        self.Search_Button.clicked.connect(self.search_patient)
+
+        # Update table initially to show all patients
+        self.receive_data()
 
     def retranslateUi(self, Form):
         _translate = QtCore.QCoreApplication.translate
