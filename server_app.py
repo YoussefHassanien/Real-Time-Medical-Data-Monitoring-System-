@@ -1,6 +1,7 @@
 import socket
 import threading
 import redis
+import json
 
 HEADER = 64
 SERVER_IP = "192.168.56.1"
@@ -13,12 +14,17 @@ Database = redis.Redis(host="localhost", port=6379, password=None)
 
 
 def create_database_patient(patient):
-	name, patient_id, temperature, date, time = patient.split(',')
+	data = json.loads(patient)
+	name = data['name']
+	patient_id = data['id']
+	temperature = data['temperature']
+	date, time = data['date'].split(',')
 	keys = Database.keys(f"*{patient_id}")
 	if len(keys):
 		Database.lpush(keys[0], f"{temperature},{date},{time}")
 	else:
 		Database.lpush(f"{name}_{patient_id}", f"{temperature},{date},{time}")
+
 
 def handle_client_message(conn, addr):
 	connected = True

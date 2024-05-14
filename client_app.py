@@ -2,6 +2,7 @@ import socket
 import random
 import datetime
 import time
+import json
 
 
 HEADER = 64
@@ -25,11 +26,13 @@ def generate_random_patient():
 		patient_id = round(random.uniform(1, 100))
 	temperature = round(random.uniform(36.1, 37.3), 1)
 	date_and_time = datetime.datetime.now().strftime("%Y-%m-%d,%H:%M:%S")
-	return f"{patient_name},{patient_id},{temperature},{date_and_time}"
+	message = {"name": patient_name, "id": patient_id, "temperature": temperature, "date": date_and_time}
+	return message
 
 
 def send_data(msg):
-	message = msg.encode(FORMAT)
+	json_msg = json.dumps(msg)
+	message = json_msg.encode(FORMAT)
 	msg_length = len(message)
 	send_length = str(msg_length).encode(FORMAT)
 	send_length += b' ' * (HEADER - len(send_length))
