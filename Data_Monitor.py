@@ -16,7 +16,6 @@ class Ui_Form(object):
         self.temperature_values = []
         self.timer = QtCore.QTimer()  
         self.current_index = 0
-        self.sort_descending = False
         
     def reset_table_clicked(self):
         # Clear previous data and initialize for new data
@@ -25,10 +24,7 @@ class Ui_Form(object):
         self.current_index = 0
         # Retrieve all data from the database
         self.receive_data()
-        if self.sort_descending:
-            self.sort_table_ascending()
-        else:
-            self.sort_table_descending()
+        self.update_table()
    
     def update_plot_dynamically(self):
         if self.current_index < len(self.temperature_values):
@@ -43,10 +39,12 @@ class Ui_Form(object):
             # Connect the new point to the previous point
             last_index = index - 1
             last_temperature = self.temperature_values[index - 2]
-            self.Patients_Temperature_Graph.plot([last_index, index], [last_temperature, temperature], pen='r', symbol='o', name='Temperature vs. Index')
+            self.Patients_Temperature_Graph.plot([last_index, index], [last_temperature, temperature], pen='r',
+                                                 symbol='o', name='Temperature vs. Index')
         else:
             # Plot the first point without connecting
-            self.Patients_Temperature_Graph.plot([index], [temperature], pen='r', symbol='o', name='Temperature vs. Index')
+            self.Patients_Temperature_Graph.plot([index], [temperature], pen='r', symbol='o',
+                                                 name='Temperature vs. Index')
 
         # Update x-axis range based on number of points plotted
         if index > 10:
@@ -129,7 +127,6 @@ class Ui_Form(object):
 
     def search_patient(self):
         patient_id = self.Search_Text_Edit.toPlainText().strip()
-        print(f"Searching for patient ID: {patient_id}")
 
         if not patient_id:
             print("No patient ID entered. Displaying all patients.")
@@ -139,7 +136,6 @@ class Ui_Form(object):
             patient_name = self.get_patient_name(patient_id)
 
             if patient_name:
-                print(f"Found patient name: {patient_name}")
                 self.receive_data(patient_id=patient_id)
             else:
                 print(f"Patient with ID {patient_id} not found in database.")
@@ -175,7 +171,8 @@ class Ui_Form(object):
         if sort_column is not None:
             try:
                 # Sort the received_data based on the selected column using get_sort_value function
-                sorted_data = sorted(self.received_data, key=lambda item: self.get_sort_value(item[0], sort_column), reverse=self.sort_descending)
+                sorted_data = sorted(self.received_data, key=lambda item: self.get_sort_value(item[0], sort_column),
+                                     reverse=self.Descending_Radio_Button.isChecked())
 
                 # Set the number of rows based on sorted data
                 self.Data_Table.setRowCount(len(sorted_data))
@@ -203,7 +200,8 @@ class Ui_Form(object):
 
         self.Data_Table.update()
 
-    def get_sort_value(self, key_str, sort_column):
+    @staticmethod
+    def get_sort_value(key_str, sort_column):
         parts = key_str.split('_')
 
         if sort_column == 0:
@@ -222,15 +220,7 @@ class Ui_Form(object):
             else:
                 return ""  # Return empty string if no valid name found
         else:
-            return None  
-
-    def sort_table_ascending(self):
-        self.sort_descending = False
-        self.update_table()
-
-    def sort_table_descending(self):
-        self.sort_descending = True
-        self.update_table()
+            return None
 
     def setupUi(self, Form):
         Form.setObjectName("Form")
@@ -439,8 +429,8 @@ class Ui_Form(object):
 
         self.Search_Button.clicked.connect(self.search_patient)
         self.Data_Table.itemClicked.connect(self.on_table_item_clicked)
-        self.Ascending_Radio_Button.clicked.connect(self.sort_table_ascending)
-        self.Descending_Radio_Button.clicked.connect(self.sort_table_descending)
+        self.Ascending_Radio_Button.clicked.connect(self.update_table)
+        self.Descending_Radio_Button.clicked.connect(self.update_table)
         self.Reset_Table_Button.clicked.connect(self.reset_table_clicked)
         self.Sorting_Combo_Box.currentIndexChanged.connect(self.update_table)
 
@@ -449,11 +439,10 @@ class Ui_Form(object):
 
         # Update table initially to show all patients
         self.receive_data()
-        self.sort_table_ascending() 
         self.Ascending_Radio_Button.setChecked(True)
 
         self.timer.timeout.connect(self.update_plot_dynamically)
-        self.timer.setInterval(1000)  
+        self.timer.setInterval(250)
 
     def retranslateUi(self, Form):
         _translate = QtCore.QCoreApplication.translate
